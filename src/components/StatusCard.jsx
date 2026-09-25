@@ -10,20 +10,27 @@ export default function StatusCard() {
     if (!symptoms) return;
 
     setLoading(true);
+
+    // Dynamic API URL for production (Vercel) & local dev fallback
     const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-fetch(`${API_BASE}/diagnose`, {
+
+    fetch(`${API_BASE}/diagnose`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ symptoms })
+      body: JSON.stringify({ symptoms }),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch diagnosis');
+        return res.json();
+      })
       .then((data) => {
         setResult(data.diagnosis);
         setLoading(false);
       })
       .catch((err) => {
         console.error('Diagnostic API Error:', err);
-        setLoading(false);
+        setResult('Error connecting to diagnostic engine.');
+        setLoading(false); // Fixed camelCase typo
       });
   };
 
@@ -32,30 +39,25 @@ fetch(`${API_BASE}/diagnose`, {
       <h3>Automated Triage & Hardware Diagnostic Engine</h3>
       <form onSubmit={handleDiagnose} style={{ marginTop: '1rem' }}>
         <div className="form-group">
-          <input 
-            type="text" 
+          <label htmlFor="symptoms">Describe Hardware/Software Issue:</label>
+          <textarea
+            id="symptoms"
+            rows="3"
+            placeholder="e.g., Laptop screen flickers when moved, CPU overheating..."
             value={symptoms}
             onChange={(e) => setSymptoms(e.target.value)}
-            placeholder="Type symptoms (e.g., '3 beeps no display', 'blue screen crash', 'sudden power off')..."
             required
           />
         </div>
-        <button type="submit" className="btn primary-btn" disabled={loading}>
-          {loading ? 'Analyzing Hardware Bus...' : 'Run Diagnostic AI'}
+        <button type="submit" disabled={loading} style={{ marginTop: '0.5rem' }}>
+          {loading ? 'Analyzing System...' : 'Run Automated Diagnostic'}
         </button>
       </form>
 
       {result && (
-        <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#0f172a', borderRadius: '6px', border: '1px solid #3b82f6' }}>
-          <p style={{ color: '#60a5fa', fontWeight: 'bold', margin: '0 0 0.5rem 0' }}>
-            Diagnostic Category: {result.category} ({result.severity} Severity)
-          </p>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem' }}>
-            <strong>Action Plan:</strong> {result.recommendedAction}
-          </p>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8' }}>
-            <strong>Possible Root Causes:</strong> {result.possibleCauses.join(', ')}
-          </p>
+        <div style={{ marginTop: '1rem', padding: '1rem', background: '#1a1a1a', borderRadius: '6px' }}>
+          <h4>Recommended Resolution:</h4>
+          <p>{result}</p>
         </div>
       )}
     </section>
