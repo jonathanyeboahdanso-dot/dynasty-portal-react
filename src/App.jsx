@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import Header from './components/Header';
-import StatusCard from './components/StatusCard';
-import RepairForm from './components/RepairForm';
+import Header from './components/Header.jsx';
+import StatusCard from './components/StatusCard.jsx';
+import RepairForm from './components/RepairForm.jsx';
 import './App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
