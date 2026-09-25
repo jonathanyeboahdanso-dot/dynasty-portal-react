@@ -10,7 +10,8 @@ export default function StatusCard() {
     if (!symptoms) return;
 
     setLoading(true);
-    fetch('http://localhost:5000/api/diagnose', {
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+fetch(`${API_BASE}/diagnose`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ symptoms })
